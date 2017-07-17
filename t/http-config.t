@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
-plan tests => 16;
+plan tests => 18;
 
 use HTTP::Config;
 
@@ -80,6 +80,18 @@ is(j($conf->matching_items($response)), "HTML|html|text|any");
     $conf->remove(owner => undef);
 
     ok(($conf->empty), 'found and removed the config entry');
+    is(scalar(@warnings), 0, 'no warnings')
+        or diag('got warnings: ', explain(\@warnings));
+    
+    # Issue 62
+    @warnings = ();
+    $conf = HTTP::Config->new;
+    $conf->add_item('c_warning', 'm_header__Client-Warning' => 'foo');
+    my $request = HTTP::Request->new(GET => "http://www.example.com/foo/bar");
+    my $response = HTTP::Response->new(301 => "Redirect", ['Client-Warning', 'foo']);
+
+    is(j($conf->matching_items($request, $response)), "c_warning",
+        'Response 301 with Client-Warning');
     is(scalar(@warnings), 0, 'no warnings')
         or diag('got warnings: ', explain(\@warnings));
 }
