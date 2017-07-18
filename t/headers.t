@@ -3,7 +3,7 @@ use warnings;
 
 use Test::More;
 
-plan tests => 168;
+plan tests => 172;
 
 my($h, $h2);
 sub j { join("|", @_) }
@@ -171,7 +171,7 @@ like($h->header("Date"), qr/^[A-Z][a-z][a-z], \d\d .* GMT$/);
 }
 
 if ($] < 5.006) {
-   Test::skip("Can't call variable method", 1) for 1..13;
+   Test::skip("Can't call variable method", 1) for 1..17;
 }
 else {
 # other date fields
@@ -182,6 +182,7 @@ for my $field (qw(expires if_modified_since if_unmodified_since
     is($h->$field, undef);
     is($h->$field(time), undef);
     like((time - $h->$field), qr/^[01]$/);
+    ok($h->$field('not an int'));
 EOT
 }
 is(j($h->header_field_names), "Date|If-Modified-Since|If-Unmodified-Since|Expires|Last-Modified");
